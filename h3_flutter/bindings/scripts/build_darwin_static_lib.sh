@@ -74,8 +74,62 @@ cd ..
 
 echo "Creating framework bundles..."
 
-# Function to create a framework bundle from a dylib
-create_framework() {
+# Function to create an iOS framework bundle (flat structure)
+create_ios_framework() {
+    local PLATFORM_DIR=$1
+    local FRAMEWORK_NAME="h3"
+    local FRAMEWORK_DIR="${PLATFORM_DIR}/install/${FRAMEWORK_NAME}.framework"
+    
+    mkdir -p "${FRAMEWORK_DIR}/Headers"
+    
+    # Copy dylib as the framework binary
+    cp "${PLATFORM_DIR}/install/lib/libh3.dylib" "${FRAMEWORK_DIR}/${FRAMEWORK_NAME}"
+    
+    # Update install name to use framework path
+    install_name_tool -id "@rpath/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
+        "${FRAMEWORK_DIR}/${FRAMEWORK_NAME}"
+    
+    # Copy headers
+    cp -R "${PLATFORM_DIR}/install/include/"* "${FRAMEWORK_DIR}/Headers/"
+    
+    # Create Info.plist at root level (iOS requirement)
+    cat > "${FRAMEWORK_DIR}/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>
+    <key>CFBundleExecutable</key>
+    <string>${FRAMEWORK_NAME}</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.uber.h3</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>${FRAMEWORK_NAME}</string>
+    <key>CFBundlePackageType</key>
+    <string>FMWK</string>
+    <key>CFBundleShortVersionString</key>
+    <string>4.2.1</string>
+    <key>CFBundleVersion</key>
+    <string>4.2.1</string>
+    <key>CFBundleSupportedPlatforms</key>
+    <array>
+        <string>iPhoneOS</string>
+    </array>
+    <key>MinimumOSVersion</key>
+    <string>12.0</string>
+</dict>
+</plist>
+EOF
+    
+    # Sign the framework
+    codesign --sign - --force "${FRAMEWORK_DIR}/${FRAMEWORK_NAME}"
+}
+
+# Function to create a macOS framework bundle (versioned structure)
+create_macos_framework() {
     local PLATFORM_DIR=$1
     local FRAMEWORK_NAME="h3"
     local FRAMEWORK_DIR="${PLATFORM_DIR}/install/${FRAMEWORK_NAME}.framework"
@@ -87,13 +141,13 @@ create_framework() {
     cp "${PLATFORM_DIR}/install/lib/libh3.dylib" "${FRAMEWORK_DIR}/Versions/A/${FRAMEWORK_NAME}"
     
     # Update install name to use framework path
-    install_name_tool -id "@rpath/${FRAMEWORK_NAME}.framework/${FRAMEWORK_NAME}" \
+    install_name_tool -id "@rpath/${FRAMEWORK_NAME}.framework/Versions/A/${FRAMEWORK_NAME}" \
         "${FRAMEWORK_DIR}/Versions/A/${FRAMEWORK_NAME}"
     
     # Copy headers
     cp -R "${PLATFORM_DIR}/install/include/"* "${FRAMEWORK_DIR}/Versions/A/Headers/"
     
-    # Create symbolic links
+    # Create symbolic links (macOS style)
     ln -sf "A" "${FRAMEWORK_DIR}/Versions/Current"
     ln -sf "Versions/Current/${FRAMEWORK_NAME}" "${FRAMEWORK_DIR}/${FRAMEWORK_NAME}"
     ln -sf "Versions/Current/Headers" "${FRAMEWORK_DIR}/Headers"
@@ -130,9 +184,9 @@ EOF
 }
 
 # Create frameworks for each platform
-create_framework "ios"
-create_framework "ios-simulator"
-create_framework "macos"
+create_ios_framework "ios"
+create_ios_framework "ios-simulator"
+create_macos_framework "macos"
 
 ##########
 # Create XCFramework
