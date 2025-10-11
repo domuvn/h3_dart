@@ -15,10 +15,16 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/h3lib/include)
 # Gather source files
 file(GLOB CSources "${CMAKE_CURRENT_SOURCE_DIR}/h3lib/lib/*.c")
 
-# Build library
-add_library(h3 STATIC ${CSources})
+# Build library (SHARED for dynamic linking)
+add_library(h3 SHARED ${CSources})
+
+# Set install name for relocatable library (required for iOS/macOS)
+set_target_properties(h3 PROPERTIES
+    INSTALL_NAME_DIR "@rpath"
+    MACOSX_RPATH TRUE
+)
 
 # Install library and headers
-install(TARGETS h3 ARCHIVE DESTINATION lib)
+install(TARGETS h3 LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
 install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated/ DESTINATION include)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/h3lib/include/ DESTINATION include)
