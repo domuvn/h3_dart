@@ -38,3 +38,17 @@ node_modules
 .fvm/
 .fvmrc
 .flutter-plugins-dependencies
+
+# Lock files and auto-generated
+pubspec.lock
+Podfile.lock
+**/Podfile.lock
+*.xcodeproj/project.pbxproj
+
+# Flutter generated files
+**/generated_plugin_registrant.cc
+**/generated_plugin_registrant.h
+**/generated_plugins.cmake
+
+# Warp AI rules file (project-specific)
+WARP.md
