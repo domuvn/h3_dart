@@ -6,6 +6,7 @@ on:
       package:
         type: choice
         required: true
+        description: "Select the package to publish"
         options:
           - h3_common
           - geojson2h3
