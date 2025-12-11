@@ -1,9 +1,9 @@
 name: Publish to pub.dev
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
     inputs:
-      package: 
+      package:
         type: choice
         required: true
         options:
@@ -19,29 +19,29 @@ jobs:
     runs-on: ${{ github.event.inputs.package == 'h3_flutter' && 'macos-latest' || 'ubuntu-latest' }}
     permissions:
       id-token: write # Required for authentication using OIDC
-    steps: 
-    - uses: actions/checkout@v4
-      with:
-        submodules: true
-    
-    - uses: dart-lang/setup-dart@v1 # needed for OIDC token for dart publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - uses: subosito/flutter-action@v2
-      with:
-        cache: true
+      - uses: dart-lang/setup-dart@v1 # needed for OIDC token for dart publish
 
-    - name: Remove symlinks
-      run: h3_flutter/bindings/scripts/toggle_h3lib.sh
-      if: inputs.package == 'h3_flutter'
+      - uses: subosito/flutter-action@v2
+        with:
+          cache: true
 
-    - name: Prebuild iOS & macOS library
-      run: h3_flutter/bindings/scripts/build_darwin_static_lib.sh
-      if: inputs.package == 'h3_flutter'
+      - name: Remove symlinks
+        run: h3_flutter/bindings/scripts/toggle_h3lib.sh
+        if: inputs.package == 'h3_flutter'
 
-    - name: Install dependencies
-      run: flutter pub get
-      working-directory: ./${{ inputs.package }}
+      - name: Prebuild iOS & macOS library
+        run: h3_flutter/bindings/scripts/build_darwin_static_lib.sh
+        if: inputs.package == 'h3_flutter'
 
-    - name: Publish
-      run: flutter pub publish --force
-      working-directory: ./${{ inputs.package }}
+      - name: Install dependencies
+        run: flutter pub get
+        working-directory: ./${{ inputs.package }}
+
+      - name: Publish
+        run: flutter pub publish --force
+        working-directory: ./${{ inputs.package }}

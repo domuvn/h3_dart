@@ -1,6 +1,6 @@
 name: Tests
 
-on: 
+on:
   push:
   pull_request:
   schedule:
@@ -105,7 +105,7 @@ jobs:
         with:
           channel: ${{ matrix.sdk }}
           cache: true
-  
+
       - name: Prepare tests
         run: scripts/prepare_tests.sh
 
@@ -154,7 +154,7 @@ jobs:
         with:
           channel: ${{ matrix.sdk }}
           cache: true
-  
+
       - name: Prepare tests
         run: scripts/prepare_tests.sh
 
@@ -193,11 +193,11 @@ jobs:
         with:
           channel: stable
           cache: true
-      
+
       - uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Disable macos
         run: flutter config --no-enable-macos-desktop
@@ -214,7 +214,7 @@ jobs:
       - name: Analyze
         run: flutter analyze
         working-directory: ./h3_flutter
-      
+
       - name: Enable KVM group perms
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -259,61 +259,61 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ windows-latest, ubuntu-latest, macos-latest ]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        submodules: true
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
 
-    - name: Install linux dependencies
-      run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
-      if: matrix.os == 'ubuntu-latest'
+      - name: Install linux dependencies
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+        if: matrix.os == 'ubuntu-latest'
 
-    - name: Setup subosito/flutter-action@v2
-      uses: subosito/flutter-action@v2
-      with:
-        channel: beta
-        cache: true
+      - name: Setup subosito/flutter-action@v2
+        uses: subosito/flutter-action@v2
+        with:
+          channel: beta
+          cache: true
 
-    - name: Enable linux
-      run: flutter config --enable-linux-desktop
+      - name: Enable linux
+        run: flutter config --enable-linux-desktop
 
-    - name: Enable macos
-      run: flutter config --enable-macos-desktop
+      - name: Enable macos
+        run: flutter config --enable-macos-desktop
 
-    - name: Enable windows
-      run: flutter config --enable-windows-desktop
+      - name: Enable windows
+        run: flutter config --enable-windows-desktop
 
-    - name: Prebuild iOS & macOS library
-      run: bindings/scripts/build_darwin_static_lib.sh
-      working-directory: ./h3_flutter
-      if: matrix.os == 'macos-latest'
+      - name: Prebuild iOS & macOS library
+        run: bindings/scripts/build_darwin_static_lib.sh
+        working-directory: ./h3_flutter
+        if: matrix.os == 'macos-latest'
 
-    - name: Pub get
-      run: "flutter pub get"
-      working-directory: ./h3_flutter
+      - name: Pub get
+        run: "flutter pub get"
+        working-directory: ./h3_flutter
 
-    - name: Analyze
-      run: "flutter analyze"
-      working-directory: ./h3_flutter
+      - name: Analyze
+        run: "flutter analyze"
+        working-directory: ./h3_flutter
 
-    - name: Disable web
-      run: flutter config --no-enable-web
-      working-directory: ./h3_flutter
+      - name: Disable web
+        run: flutter config --no-enable-web
+        working-directory: ./h3_flutter
 
-    - name: Run tests (linux)
-      run: | 
+      - name: Run tests (linux)
+        run: |
           export DISPLAY=:99
           sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
           flutter test integration_test/app_test.dart
-      working-directory: ./h3_flutter/example
-      if: matrix.os == 'ubuntu-latest'
+        working-directory: ./h3_flutter/example
+        if: matrix.os == 'ubuntu-latest'
 
-    - name: Run tests
-      run: flutter test integration_test/app_test.dart
-      working-directory: ./h3_flutter/example
-      if: matrix.os != 'ubuntu-latest'
+      - name: Run tests
+        run: flutter test integration_test/app_test.dart
+        working-directory: ./h3_flutter/example
+        if: matrix.os != 'ubuntu-latest'
 
   h3_web_tests:
     runs-on: ${{ matrix.os }}
