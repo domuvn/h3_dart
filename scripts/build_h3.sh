@@ -11,6 +11,7 @@ cd h3_ffi/c/h3/build
 cmake .. -DCMAKE_BUILD_TYPE=Release \
   -DBUILD_SHARED_LIBS=ON \
   -DBUILD_TESTING=OFF \
+  -DENABLE_DOCS=OFF \
   -DCMAKE_LIBRARY_OUTPUT_DIRECTORY=lib
 
 cmake --build . --config Release
